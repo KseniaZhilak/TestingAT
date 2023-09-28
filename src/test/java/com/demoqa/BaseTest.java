@@ -20,7 +20,9 @@ public class BaseTest {
         ChromeOptions opt = new ChromeOptions();
         opt.setPageLoadStrategy(PageLoadStrategy.EAGER);
         chromeDriver = new ChromeDriver(opt);
+        // Ожидание на поиск элемента, ждет каждый раз при новом поиске findElement
         chromeDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(15));
+        // Создание объекта явного ожидания чего-либо
         wait = new WebDriverWait(chromeDriver, Duration.ofSeconds(10));
     }
 

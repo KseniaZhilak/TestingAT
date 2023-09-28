@@ -6,6 +6,8 @@ import org.openqa.selenium.WebElement;
 
 public class PageLinks {
     protected WebDriver chromeDriver;
+    protected WebElement homeLink;
+    protected WebElement homeLinkZ8;
     protected WebElement createdLink;
     protected WebElement noContentLink;
     protected WebElement movedLink;
@@ -14,9 +16,10 @@ public class PageLinks {
     protected WebElement forbiddenLink;
     protected WebElement notFoundLink;
 
-
     public PageLinks(WebDriver chromeDriver) {
         this.chromeDriver = chromeDriver;
+        this.homeLink = chromeDriver.findElement(By.id("simpleLink"));
+        this.homeLinkZ8 = chromeDriver.findElement(By.id("dynamicLink"));
         this.createdLink = chromeDriver.findElement(By.id("created"));
         this.noContentLink = chromeDriver.findElement(By.id("no-content"));
         this.movedLink = chromeDriver.findElement(By.id("moved"));
@@ -24,6 +27,10 @@ public class PageLinks {
         this.unauthorizedLink = chromeDriver.findElement(By.id("unauthorized"));
         this.forbiddenLink = chromeDriver.findElement(By.id("forbidden"));
         this.notFoundLink = chromeDriver.findElement(By.id("invalid-url"));
+    }
+
+    public void clickHome() {
+        homeLink.click();
     }
 
     public void clickCreatedLink() {

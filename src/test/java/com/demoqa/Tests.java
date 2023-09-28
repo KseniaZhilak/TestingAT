@@ -2,10 +2,12 @@ package com.demoqa;
 
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import pageObject.PageButtons;
 import pageObject.PageLinks;
 import pageObject.PageTextBox;
 
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,6 +56,41 @@ public class Tests extends BaseTest {
         actualResponse = pageLinks.getLinkResponse().getText();
         assertTrue(actualResponse.matches("^.+301.+Moved Permanently$"));
     }
+
+    @Test
+    public void testLinksNewTab() throws InterruptedException {
+        chromeDriver.get("https://demoqa.com/links");
+        PageLinks pageLinks = new PageLinks(chromeDriver);
+        String currentWindow = chromeDriver.getWindowHandle();
+        pageLinks.clickHome();
+
+        chromeDriver.getWindowHandles().stream()
+                .filter(Predicate.not(currentWindow::equals)) // .filter(e -> !currentWindow.equals(e)))
+                .findFirst()
+                .ifPresent(handle -> chromeDriver.switchTo().window(handle));
+
+        assertTrue(chromeDriver.getCurrentUrl().endsWith("demoqa.com/"),
+                "В Url " + chromeDriver.getCurrentUrl() + " не содержится ссылка 'demoqa.com'");
+    }
+
+    @Test
+    public void testButtons() {
+        chromeDriver.get("https://demoqa.com/buttons");
+        PageButtons pageButtons = new PageButtons(chromeDriver);
+
+        pageButtons.doubleClick();
+        assertEquals("You have done a double click", pageButtons.getDoubleClickMessage(),
+                "Отсутствует текст '" + pageButtons.getDoubleClickMessage() + "'после двойного клика мыши");
+
+        pageButtons.rightClick();
+        assertEquals("You have done a right click", pageButtons.getRightClickMessage(),
+                "Отсутствует текст '" + pageButtons.getRightClickMessage() + "'после клика правой кнопкой мыши");
+
+        pageButtons.clickMe();
+        assertEquals("You have done a dynamic click", pageButtons.getDynamicClickMessage(),
+                "Отсутствует текст '" + pageButtons.getDynamicClickMessage() + "'после клика левой кнопкой мыши");
+    }
+
 }
 
 
