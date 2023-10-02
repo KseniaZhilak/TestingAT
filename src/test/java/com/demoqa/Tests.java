@@ -1,18 +1,19 @@
 package com.demoqa;
 
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import pageObject.PageButtons;
-import pageObject.PageLinks;
-import pageObject.PageTextBox;
+import pageObject.*;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Tests extends BaseTest {
     @Test
@@ -91,7 +92,78 @@ public class Tests extends BaseTest {
                 "Отсутствует текст '" + pageButtons.getDynamicClickMessage() + "'после клика левой кнопкой мыши");
     }
 
+    @Test
+    public void testDynamicPropertiesButton() {
+        chromeDriver.get("https://demoqa.com/dynamic-properties");
+        PageDynamicProperties pageDynamicProperties = new PageDynamicProperties(chromeDriver);
+
+        assertEquals("This text has random Id", pageDynamicProperties.getTextRandomId(),
+                "Отсутствует текст - " + pageDynamicProperties.getTextRandomId());
+
+        assertFalse(pageDynamicProperties.getButtonEnableAfter().isEnabled());
+        wait.until(ExpectedConditions.elementToBeClickable(pageDynamicProperties.getButtonEnableAfter()));
+        assertTrue(pageDynamicProperties.getButtonEnableAfter().isEnabled());
+
+    }
+
+    @Test
+    public void testDynamicPropShowUpBtn() {
+        chromeDriver.get("https://demoqa.com/dynamic-properties");
+        PageDynamicProperties pageDynamicProperties = new PageDynamicProperties(chromeDriver);
+
+        Duration implicitWaitTimeout = chromeDriver.manage().timeouts().getImplicitWaitTimeout();
+        chromeDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
+        assertEquals(0, chromeDriver.findElements(By.id("visibleAfter")).size(),
+                "На странице присутствует кнопка с id = visibleAfter");
+        chromeDriver.manage().timeouts().implicitlyWait(implicitWaitTimeout);
+        wait.until(ExpectedConditions.visibilityOf(pageDynamicProperties.getButtonVisibleAfter()));
+        assertTrue(pageDynamicProperties.getButtonVisibleAfter().isDisplayed(),
+                "Кнопка с id = visibleAfter на странице не отображается");
+    }
+
+    @Test
+    public void testDynamicPropertiesColor() {
+        chromeDriver.get("https://demoqa.com/dynamic-properties");
+        PageDynamicProperties pageDynamicProperties = new PageDynamicProperties(chromeDriver);
+
+        WebElement btnColorChange = pageDynamicProperties.getButtonColorChange();
+        String colorNow = btnColorChange.getCssValue("color");
+        wait.until(ExpectedConditions.attributeContains(btnColorChange, "class", "text-danger"));
+        String colorChange = btnColorChange.getCssValue("color");
+
+        assertNotEquals(colorNow, colorChange,
+                "Кнопка не изменила цвет");
+    }
+
+    @Test
+    void testWebTables() {
+        chromeDriver.get("https://demoqa.com/webtables");
+        PageWebTables pageWebTables = new PageWebTables(chromeDriver);
+        pageWebTables.clickButtonAdd();
+
+        PageWebTables.RegistrationForm form = pageWebTables.new RegistrationForm();
+        form.setFieldFirstName("Ksenia");
+        form.setFieldLastName("Zhilak");
+        form.setFieldEmail("email@bk.ru");
+        form.setFieldAge("24");
+        form.setFieldSalary(50_000);
+        form.setFieldDepartment("Programming");
+        form.clickButtonSubmit();
+
+        List<Map<String, String>> maps = pageWebTables.collectHeadersRows();
+
+        assertTrue(maps.stream().anyMatch(x ->
+            x.get("First Name").equals("Ksenia")&&
+            x.get("Last Name").equals("Zhilak")&&
+            x.get("Age").equals("24")&&
+            x.get("Email").equals("email@bk.ru")&&
+            x.get("Salary").equals(String.valueOf(50_000))&&
+            x.get("Department").equals("Programming")
+        ), "Данные в новой строке не совпадают");
+    }
 }
+
+
 
 
 
